@@ -1,15 +1,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import numeron from './modules/numeron';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
   modules: {
+    numeron
   },
 });

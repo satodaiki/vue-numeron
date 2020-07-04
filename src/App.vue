@@ -1,61 +1,57 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
+    <v-container>
+      <v-simple-table
+        :dense="dense"
+        :fixed-header="fixedHeader"
+        :height="height"
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left">Input Number</th>
+              <th class="text-left">Get</th>
+              <th class="text-left">Near</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in getPlayer()" :key="item.name">
+              <td>{{ item.name }}</td>
+              <td>{{ item.calories }}</td>
+              <td>{{ item.calories }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+    </v-container>
 
-    <v-content>
-      <HelloWorld/>
-    </v-content>
+    <v-container>
+      <v-text-field placeholder="Please input number." maxlength="4" />
+      <v-btn type="button" id="submit_button">Submit</v-btn>
+    </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+import { Player, IPlayer } from './store/modules/numeron';
 
-export default Vue.extend({
-  name: 'App',
-
-  components: {
-    HelloWorld,
+@Component({
+  computed: {
+    ...mapGetters('numeron', ['getPlayer']),
   },
+})
+export default class App extends Vue {
 
-  data: () => ({
-    //
-  }),
-});
+  private player1 = new Player();
+  
+  public create() {
+    this.player1.createNumeronNumber();
+
+    this.$store.commit('numeron/addPlayer', this.player1);
+  }
+
+
+}
 </script>
