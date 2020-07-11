@@ -1,8 +1,7 @@
 <template>
-  <v-container>
-    <v-content>{{ numeron }}</v-content>
+  <v-container fluid>
     <v-content>
-      <div class="text-h4">Current Player: {{ this.currentPlayer + 1 }}</div>
+      <div class="text-h4">Current Player: {{ this.currentPlayerIndex + 1 }}</div>
     </v-content>
     <v-content id="player-1">
       <div class="text-h4">Player 1</div>
@@ -16,7 +15,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in inputHistoryArr[0]" :key="item.index">
+            <tr v-for="item in players[0].history" :key="item.index">
               <td>{{ item.number }}</td>
               <td>{{ item.get }}</td>
               <td>{{ item.near }}</td>
@@ -37,7 +36,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in inputHistoryArr[1]" :key="item.index">
+            <tr v-for="item in players[1].history" :key="item.index">
               <td>{{ item.number }}</td>
               <td>{{ item.get }}</td>
               <td>{{ item.near }}</td>
@@ -46,31 +45,58 @@
         </template>
       </v-simple-table>
     </v-content>
-    <v-content>
-      <v-form @submit.prevent>
-        <v-text-field
-          label="Input Number..."
-          v-model="inputNumber"
-          :counter="4"
-          maxlength="4"
-        ></v-text-field>
-        <v-btn color="primary" @click="compareAnswer">Send</v-btn>
-      </v-form>
+
+    <v-content class="input-bar">
+      <v-container>
+        <v-layout>
+          <v-flex>
+            <v-content>
+              <v-form @submit.prevent>
+                <v-text-field
+                  label="Input Number..."
+                  v-model="inputNumber"
+                  :counter="4"
+                  maxlength="4"
+                ></v-text-field>
+                <v-btn color="primary" @click="compareAnswer">Send</v-btn>
+              </v-form>
+            </v-content>
+          </v-flex>
+          <v-flex>
+            <v-content>
+                <v-btn to="/">Back</v-btn>
+            </v-content>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-content>
-    <v-content>
-        <v-btn to="/">Back</v-btn>
-    </v-content>
+
   </v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
+import { uuid } from 'vue-uuid';
 
+interface IPlayer {
+  id: string;
+  numeron: string;
+  history: Array<IInputHistory>;
+}
 interface IInputHistory {
   index: number;
   number: string;
   get: number;
   near: number;
+}
+class Player implements IPlayer {
+  id: string = uuid.v4();
+  numeron: string = '';
+  history: Array<IInputHistory> = [];
+
+  constructor(numeron: string) {
+    this.numeron = numeron;
+  }
 }
 
 @Component({
@@ -80,15 +106,15 @@ interface IInputHistory {
   }
 })
 export default class Play extends Vue {
-  private inputHistoryArr: Array<Array<IInputHistory>> = [];
+  private players: Array<IPlayer> = [];
   private inputNumber: string = '';
-  private currentPlayer: number = 0;
+  private currentPlayerIndex: number = 0;
   private numeron = '0000';
   private mode = 'single';
 
   mounted() {
     for (let i = 0; i < 2; i++) {
-        this.inputHistoryArr.push(new Array<IInputHistory>());
+        this.players.push(new Player(this.computeNumeron()));
     }
 
     this.setMode();
@@ -117,8 +143,8 @@ export default class Play extends Vue {
         });
     }
 
-    this.inputHistoryArr[this.currentPlayer].push({
-      index: this.inputHistoryArr[this.currentPlayer].length,
+    this.players[this.currentPlayerIndex].history.push({
+      index: this.players[this.currentPlayerIndex].history.length,
       number: this.inputNumber,
       get: result[0],
       near: result[1],
@@ -135,20 +161,20 @@ export default class Play extends Vue {
             });
         }
 
-        ++this.currentPlayer;
-        this.inputHistoryArr[this.currentPlayer].push({
-            index: this.inputHistoryArr[this.currentPlayer].length,
-            number: conputerNumeron,
-            get: conputerResult[0],
-            near: conputerResult[1],
+        ++this.currentPlayerIndex;
+        this.players[this.currentPlayerIndex].history.push({
+          index: this.players[this.currentPlayerIndex].history.length,
+          number: conputerNumeron,
+          get: conputerResult[0],
+          near: conputerResult[1],
         });
 
-        this.currentPlayer = 0;
+        this.currentPlayerIndex = 0;
         return;
     }
 
-    if (this.inputHistoryArr.length - 1 === this.currentPlayer) this.currentPlayer = 0
-    else this.currentPlayer++;
+    if (this.players.length - 1 === this.currentPlayerIndex) this.currentPlayerIndex = 0
+    else this.currentPlayerIndex++;
   }
 
   /**
@@ -198,3 +224,13 @@ export default class Play extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+.input-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  background-color: white;
+}
+</style>
