@@ -31,6 +31,9 @@
         <v-btn color="primary" @click="compareAnswer">Send</v-btn>
       </v-form>
     </v-container>
+    <v-container>
+        <v-btn to="/">Back</v-btn>
+    </v-container>
   </v-app>
 </template>
 
@@ -46,14 +49,34 @@ interface IInputHistory {
 
 @Component({
   name: 'Play',
+  watch: {
+      '$route': 'setMode',
+  }
 })
 export default class Play extends Vue {
   private inputHistory: Array<IInputHistory> = [];
   private inputNumber: string = '';
   private numeron = '0000';
+  private mode = 'single';
 
-  created() {
+  create() {
     this.numeron = this.computeNumeron();
+  }
+  mounted() {
+    this.setMode();
+
+    switch (this.mode) {
+        case 'single':
+        case 'multi':
+            this.numeron = this.computeNumeron();
+            break;
+    }
+  }
+
+  private setMode() {
+      this.$nextTick(() => {
+          this.mode = this.$route.params.mode;
+      })
   }
 
   private compareAnswer() {

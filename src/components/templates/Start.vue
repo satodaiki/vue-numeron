@@ -1,21 +1,31 @@
 <template>
     <v-container>
         <div class="text-h3">SELECT MODE.</div>
-        <v-radio-group v-model="radios" :mandatory="false">
+        <v-radio-group v-model="mode" :mandatory="false">
             <v-radio label="Single" value="single"></v-radio>
-            <v-radio label="Multi" value="multi"></v-radio>
+            <v-radio label="Multi (To Be Continued...)" value="multi"></v-radio>
         </v-radio-group>
-        <v-btn>Start</v-btn>
+        <v-btn @click="movePlay">Start</v-btn>
     </v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
+import VueRouter from 'vue-router';
 
 @Component({
     name: 'Start'
 })
 export default class Start extends Vue {
-    private radios = 'single';
+    private mode: string = 'single';
+
+    private movePlay() {
+        this.$router.push({
+            name: 'play',
+            params: {
+                mode: this.mode
+            }
+        })
+    }
 }
 </script>

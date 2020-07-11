@@ -1,7 +1,6 @@
 <template>
   <v-app>
-    <start />
-    <play />
+    <router-view />
   </v-app>
 </template>
 
@@ -24,72 +23,12 @@ interface IInputHistory {
     Play,
   }
 })
-export default class App extends Vue {
-  private inputHistory: Array<IInputHistory> = [];
-  private inputNumber: string = '';
-  private numeron = '0000';
-
-  created() {
-    this.numeron = this.computeNumeron();
-  }
-
-  private compareAnswer() {
-    const result = this.compareInputValue(this.inputNumber, this.numeron);
-
-    if (result[0] === 4) alert('you win');
-
-    this.inputHistory.push({
-      index: this.inputHistory.length,
-      number: this.inputNumber,
-      get: result[0],
-      near: result[1],
-    })
-  }
-
-  /**
-   * 値比較
-   * 
-   * @param {*} v 入力値
-   * @param {*} a 比較値
-   */
-  private compareInputValue(v: string, a: string) {
-    if (a === v) {
-        return [4, 0];
-    } else {
-        let get = 0;
-        let near = 0;
-        for (let i = 0; i < 4; i++) {
-            if (a[i] === v[i]) {
-                get++;
-                continue;
-            }
-            for (let j = 0; j < 4; j++) {
-                if (i === j) continue;
-                else if (a[i] === v[j]) near++;
-            }
-        }
-        return [get, near];
-    }
-  }
-
-  /**
-   * 4桁で、各桁が違う数値の乱数を生成する
-   */
-  private computeNumeron() {
-    let arr = [0,1,2,3,4,5,6,7,8,9];
-    let length = arr.length;
-
-    while (length) {
-        var j = Math.floor( Math.random() * length );
-        var t = arr[--length];
-        arr[length] = arr[j];
-        arr[j] = t;
-    }
-    
-    let result = "";
-    arr.forEach(v => result += v);
-
-    return result.slice(0, 4);
-  }
-}
+export default class App extends Vue {}
 </script>
+
+<style lang="scss">
+// a {
+//   color: inherit;
+//   text-decoration: none;
+// }
+</style>
