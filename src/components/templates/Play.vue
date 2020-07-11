@@ -1,10 +1,10 @@
 <template>
-  <v-app>
-    <v-container>{{ numeron }}</v-container>
-    <v-container>
+  <v-container>
+    <v-content>{{ numeron }}</v-content>
+    <v-content>
       <div class="text-h4">Current Player: {{ this.currentPlayer + 1 }}</div>
-    </v-container>
-    <v-container id="player-1">
+    </v-content>
+    <v-content id="player-1">
       <div class="text-h4">Player 1</div>
       <v-simple-table>
         <template v-slot:default>
@@ -24,8 +24,8 @@
           </tbody>
         </template>
       </v-simple-table>
-    </v-container>
-    <v-container id="player-2">
+    </v-content>
+    <v-content id="player-2">
       <div class="text-h4">Player 2</div>
       <v-simple-table>
         <template v-slot:default>
@@ -45,8 +45,8 @@
           </tbody>
         </template>
       </v-simple-table>
-    </v-container>
-    <v-container>
+    </v-content>
+    <v-content>
       <v-form @submit.prevent>
         <v-text-field
           label="Input Number..."
@@ -56,11 +56,11 @@
         ></v-text-field>
         <v-btn color="primary" @click="compareAnswer">Send</v-btn>
       </v-form>
-    </v-container>
-    <v-container>
+    </v-content>
+    <v-content>
         <v-btn to="/">Back</v-btn>
-    </v-container>
-  </v-app>
+    </v-content>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -147,7 +147,7 @@ export default class Play extends Vue {
         return;
     }
 
-    if (this.inputHistoryArr.length + 1 === this.currentPlayer) this.currentPlayer = 0
+    if (this.inputHistoryArr.length - 1 === this.currentPlayer) this.currentPlayer = 0
     else this.currentPlayer++;
   }
 
