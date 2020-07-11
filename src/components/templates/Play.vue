@@ -1,14 +1,41 @@
 <template>
   <v-app>
-    <start />
-    <play />
+    <v-container>
+      <v-simple-table>
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left">Input Number</th>
+              <th class="text-left">Get</th>
+              <th class="text-left">Near</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in inputHistory" :key="item.index">
+              <td>{{ item.number }}</td>
+              <td>{{ item.get }}</td>
+              <td>{{ item.near }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+    </v-container>
+    <v-container>
+      <v-form @submit.prevent>
+        <v-text-field
+          label="Input Number..."
+          v-model="inputNumber"
+          :counter="4"
+          maxlength="4"
+        ></v-text-field>
+        <v-btn color="primary" @click="compareAnswer">Send</v-btn>
+      </v-form>
+    </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import Start from '@/components/templates/Start.vue';
-import Play from '@/components/templates/Play.vue';
 
 interface IInputHistory {
   index: number;
@@ -18,13 +45,9 @@ interface IInputHistory {
 }
 
 @Component({
-  name: 'App',
-  components: {
-    Start,
-    Play,
-  }
+  name: 'Play',
 })
-export default class App extends Vue {
+export default class Play extends Vue {
   private inputHistory: Array<IInputHistory> = [];
   private inputNumber: string = '';
   private numeron = '0000';
