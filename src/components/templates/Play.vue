@@ -1,9 +1,5 @@
 <template>
   <v-container fluid>
-    <v-content>
-      {{ players }}
-    </v-content>
-
     <v-dialog v-model="dialog" persistent max-width="290">
       <v-card>
         <v-card-title class="headline">Setting</v-card-title>
