@@ -1,6 +1,33 @@
 <template>
   <v-container fluid>
     <v-content>
+      {{ players }}
+    </v-content>
+
+    <v-dialog v-model="dialog" persistent max-width="290">
+      <v-card>
+        <v-card-title class="headline">Setting</v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-content>
+              <div>{{ dialogText }}</div>
+              <v-text-field
+                label="Input Numeron..."
+                v-model="tempNumeron"
+                :counter="4"
+                maxlength="4"
+              ></v-text-field>
+            </v-content>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="nextDialog">{{ dialogBtnText }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-content>
       <div class="text-h4">Current Player: {{ this.currentPlayerIndex + 1 }}</div>
     </v-content>
     <v-content id="player-1">
@@ -83,20 +110,16 @@ interface IPlayer {
   numeron: string;
   history: Array<IInputHistory>;
 }
+class Player implements IPlayer {
+  id: string = uuid.v4();
+  numeron: string = '';
+  history: Array<IInputHistory> = [];
+}
 interface IInputHistory {
   index: number;
   number: string;
   get: number;
   near: number;
-}
-class Player implements IPlayer {
-  id: string = uuid.v4();
-  numeron: string = '';
-  history: Array<IInputHistory> = [];
-
-  constructor(numeron: string) {
-    this.numeron = numeron;
-  }
 }
 
 @Component({
@@ -109,32 +132,67 @@ export default class Play extends Vue {
   private players: Array<IPlayer> = [];
   private inputNumber: string = '';
   private currentPlayerIndex: number = 0;
-  private numeron = '0000';
+  private numeron = '0123';
   private mode = 'single';
+  private dialog = true;
+  private dialogText = '';
+  private dialogBtnText = '';
+  private tempNumeron = '';
 
   mounted() {
+    // WARN: Maximum number of players is 2
     for (let i = 0; i < 2; i++) {
-        this.players.push(new Player(this.computeNumeron()));
+        this.players.push(new Player());
     }
 
     this.setMode();
+  }
 
-    switch (this.mode) {
-        case 'single':
-        case 'multi':
-            this.numeron = this.computeNumeron();
-            break;
+  private nextDialog() {
+    if (this.mode === 'single') {
+      this.players[0].numeron = this.tempNumeron;
+      this.players[1].numeron = this.computeNumeron();
+      this.dialog = false;
+    } else if (this.mode === 'multi') {
+      if (this.players[0].numeron.length === 4) {
+        this.players[1].numeron = this.tempNumeron;
+        this.dialog = false;
+      } else {
+        this.players[0].numeron = this.tempNumeron;
+        this.tempNumeron = '';
+        this.dialogText = "Enter Player 2 numeron";
+        this.dialogBtnText = 'Play';
+      }
     }
   }
 
   private setMode() {
       this.$nextTick(() => {
-          this.mode = this.$route.params.mode;
+        this.mode = this.$route.params.mode;
+
+        switch (this.mode) {
+          case 'single':
+            this.numeron = this.computeNumeron();
+            this.dialogText = "Enter You're numeron";
+            this.dialogBtnText = 'Play';
+            break;
+          case 'multi':
+            this.dialogText = "Enter Player 1 numeron";
+            this.dialogBtnText = 'Next';
+            break;
+        }
       })
   }
 
   private compareAnswer(): void {
-    const result = this.compareInputValue(this.inputNumber, this.numeron);
+    let targetNumeron = '';
+    if (this.currentPlayerIndex === 0) {
+      targetNumeron = this.players[this.currentPlayerIndex + 1].numeron
+    } else {
+      targetNumeron = this.players[this.currentPlayerIndex - 1].numeron
+    }
+
+    const result = this.compareInputValue(this.inputNumber, targetNumeron);
 
     if (result[0] === 4) {
         alert('you win');
@@ -151,11 +209,12 @@ export default class Play extends Vue {
     });
 
     if (this.mode === 'single') {
+        targetNumeron = this.players[this.currentPlayerIndex].numeron
         const conputerNumeron = this.computeNumeron();
-        const conputerResult = this.compareInputValue(conputerNumeron, this.numeron);
+        const conputerResult = this.compareInputValue(conputerNumeron, targetNumeron);
 
         if (conputerResult[0] === 4) {
-            alert('you win');
+            alert('computer win');
             this.$router.push({
                 name: 'start'
             });
