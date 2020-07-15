@@ -8,6 +8,12 @@
             <v-content>
               <div>{{ dialogText }}</div>
               <v-text-field
+                label="Input Player Name..."
+                v-model="tempPlayerName"
+                :counter="16"
+                maxlength="16"
+              ></v-text-field>
+              <v-text-field
                 label="Input Numeron..."
                 v-model="tempNumeron"
                 :counter="4"
@@ -24,10 +30,10 @@
     </v-dialog>
 
     <v-content>
-      <div class="text-h4">Current Player: {{ this.currentPlayerIndex + 1 }}</div>
+      <div class="text-h4">Current Player: {{ players[currentPlayerIndex].name }}</div>
     </v-content>
     <v-content id="player-1">
-      <div class="text-h4">Player 1</div>
+      <div class="text-h4">{{ players[0].name }}</div>
       <v-simple-table>
         <template v-slot:default>
           <thead>
@@ -48,7 +54,7 @@
       </v-simple-table>
     </v-content>
     <v-content id="player-2">
-      <div class="text-h4">Player 2</div>
+      <div class="text-h4">{{ players[1].name }}</div>
       <v-simple-table>
         <template v-slot:default>
           <thead>
@@ -103,11 +109,13 @@ import { uuid } from 'vue-uuid';
 
 interface IPlayer {
   id: string;
+  name: string;
   numeron: string;
   history: Array<IInputHistory>;
 }
 class Player implements IPlayer {
   id: string = uuid.v4();
+  name: string = '';
   numeron: string = '';
   history: Array<IInputHistory> = [];
 }
@@ -134,6 +142,7 @@ export default class Play extends Vue {
   private dialogText = '';
   private dialogBtnText = '';
   private tempNumeron = '';
+  private tempPlayerName = '';
 
   mounted() {
     // WARN: Maximum number of players is 2
@@ -144,25 +153,29 @@ export default class Play extends Vue {
     this.setMode();
   }
 
-  private nextDialog() {
+  private nextDialog(): void {
     if (this.mode === 'single') {
       this.players[0].numeron = this.tempNumeron;
+      this.players[0].name = this.tempPlayerName;
       this.players[1].numeron = this.computeNumeron();
       this.dialog = false;
     } else if (this.mode === 'multi') {
       if (this.players[0].numeron.length === 4) {
         this.players[1].numeron = this.tempNumeron;
+        this.players[1].name = this.tempPlayerName;
         this.dialog = false;
       } else {
         this.players[0].numeron = this.tempNumeron;
+        this.players[0].name = this.tempPlayerName;
         this.tempNumeron = '';
+        this.tempPlayerName = '';
         this.dialogText = "Enter Player 2 numeron";
         this.dialogBtnText = 'Play';
       }
     }
   }
 
-  private setMode() {
+  private setMode(): void {
       this.$nextTick(() => {
         this.mode = this.$route.params.mode;
 
@@ -204,6 +217,9 @@ export default class Play extends Vue {
       near: result[1],
     });
 
+    // 入力をリセット
+    this.inputNumber = '';
+
     if (this.mode === 'single') {
         targetNumeron = this.players[this.currentPlayerIndex].numeron
         const conputerNumeron = this.computeNumeron();
@@ -228,8 +244,11 @@ export default class Play extends Vue {
         return;
     }
 
-    if (this.players.length - 1 === this.currentPlayerIndex) this.currentPlayerIndex = 0
-    else this.currentPlayerIndex++;
+    if (this.players.length - 1 === this.currentPlayerIndex) {
+      this.currentPlayerIndex = 0;
+    } else {
+      this.currentPlayerIndex++;
+    }
   }
 
   /**
@@ -238,7 +257,7 @@ export default class Play extends Vue {
    * @param {*} v 入力値
    * @param {*} a 比較値
    */
-  private compareInputValue(v: string, a: string) {
+  private compareInputValue(v: string, a: string): [number, number] {
     if (a === v) {
         return [4, 0];
     } else {
