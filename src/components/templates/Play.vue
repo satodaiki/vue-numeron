@@ -107,24 +107,10 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { uuid } from 'vue-uuid';
 
-interface IPlayer {
-  id: string;
-  name: string;
-  numeron: string;
-  history: Array<IInputHistory>;
-}
-class Player implements IPlayer {
-  id: string = uuid.v4();
-  name: string = '';
-  numeron: string = '';
-  history: Array<IInputHistory> = [];
-}
-interface IInputHistory {
-  index: number;
-  number: string;
-  get: number;
-  near: number;
-}
+import Game from '@/domain/models/game/Game';
+import GameMode, { GameModeEnum } from '@/domain/models/game/GameMode';
+import Player from '@/domain/models/player/Player';
+import PlayerNumeron from '@/domain/models/player/PlayerNumeron';
 
 @Component({
   name: 'Play',
@@ -133,10 +119,9 @@ interface IInputHistory {
   }
 })
 export default class Play extends Vue {
-  private players: Array<IPlayer> = [];
+  private players: Array<Player> = [];
   private inputNumber: string = '';
   private currentPlayerIndex: number = 0;
-  private numeron = '0123';
   private mode = 'single';
   private dialog = true;
   private dialogText = '';
@@ -144,20 +129,17 @@ export default class Play extends Vue {
   private tempNumeron = '';
   private tempPlayerName = '';
 
-  mounted() {
-    // WARN: Maximum number of players is 2
-    for (let i = 0; i < 2; i++) {
-        this.players.push(new Player());
-    }
+  private game?: Game;
 
+  mounted() {
     this.setMode();
   }
 
   private nextDialog(): void {
     if (this.mode === 'single') {
-      this.players[0].numeron = this.tempNumeron;
-      this.players[0].name = this.tempPlayerName;
-      this.players[1].numeron = this.computeNumeron();
+      const numeron = new PlayerNumeron(this.tempNumeron.length, this.tempNumeron);
+      const player = new Player(this.tempPlayerName, numeron);
+      this.game = new Game(new GameMode(GameModeEnum.SINGLE), [ player ]);
       this.dialog = false;
     } else if (this.mode === 'multi') {
       if (this.players[0].numeron.length === 4) {
@@ -181,7 +163,6 @@ export default class Play extends Vue {
 
         switch (this.mode) {
           case 'single':
-            this.numeron = this.computeNumeron();
             this.dialogText = "Enter You're numeron";
             this.dialogBtnText = 'Play';
             break;
